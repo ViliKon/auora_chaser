@@ -1,12 +1,42 @@
 import { StatusBar } from 'expo-status-bar';
+import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import Home from './tabs/Home';
+import Settings from './tabs/Settings';
+import Map from './tabs/Map';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import UserLocation from './tabs/UserLocation';
+
+const Tab = createBottomTabNavigator();
 
 export default function App() {
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <UserLocation>
+      <NavigationContainer>
+        <Tab.Navigator
+          screenOptions={({ route }) => ({
+            tabBarIcon: ({ focused, color, size }) => {
+              let iconName;
+
+              if (route.name === 'Home') {
+                iconName = 'home';
+              } else if (route.name === 'Map') {
+                iconName = 'map';
+              } else if (route.name === 'Settings') {
+                iconName = 'settings';
+              }
+              return <Ionicons name={iconName} size={size} color={color} />;
+            },
+          })}>
+          <Tab.Screen name="Home" component={Home} />
+          <Tab.Screen name="Map" component={Map} />
+          <Tab.Screen name="Settings" component={Settings} />
+        </Tab.Navigator>
+      </NavigationContainer>
+    </UserLocation>
   );
 }
 
