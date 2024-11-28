@@ -5,7 +5,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from './tabs/Home';
 import Settings from './tabs/Settings';
-import Map from './tabs/Map';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import UserLocation from './tabs/UserLocation';
 
@@ -23,8 +22,6 @@ export default function App() {
 
               if (route.name === 'Home') {
                 iconName = 'home';
-              } else if (route.name === 'Map') {
-                iconName = 'map';
               } else if (route.name === 'Settings') {
                 iconName = 'settings';
               }
@@ -32,7 +29,6 @@ export default function App() {
             },
           })}>
           <Tab.Screen name="Home" component={Home} />
-          <Tab.Screen name="Map" component={Map} />
           <Tab.Screen name="Settings" component={Settings} />
         </Tab.Navigator>
       </NavigationContainer>

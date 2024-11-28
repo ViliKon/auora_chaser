@@ -1,135 +1,111 @@
-import { useState, useEffect, useContext } from 'react';
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TextInput, Button, FlatList } from 'react-native'
-import { Card, IconButton } from 'react-native-paper';
-import UserLocation, { LocationContext } from './UserLocation';
-
-
-
-export default function Home(onLocationUpdate) {
-
-    const [repositories, setRepositories] = useState([]);
-    const [fixedCoords, setFixedCoords] = useState([]);
-    const [loading, setLoading] = useState(false);
-
+import React, { useContext, useState, useEffect } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { LocationContext } from './UserLocation';
+import { FetchItems } from './FetchItems';
+import MapView, { Marker } from 'react-native-maps';
+import { Title } from 'react-native-paper';
+ 
+export default function Home() {
     const location = useContext(LocationContext);
+    const myLat = location ? Math.round(location.coords.latitude) : null;
+    const myLon = location ? Math.round(location.coords.longitude) : null;
 
-    const fetchData = async () => {
-        try {
-            const response = await fetch(`https://services.swpc.noaa.gov/json/ovation_aurora_latest.json`);
-            const data = await response.json();
-            console.log('Fetched Data:', data);
-            setRepositories(data);
-        } catch (error) {
-            console.error('Error fetching data:', error)
-        }
-    };
-
-    const checkCoordinate = async () => {
-        const myLocation = Math.round(location.coords.latitude, 0);
-        for (i = 0; i < repositories.coordinates.length; i++) {
-            const firstCoordinate = repositories.coordinates[i];
-            const [longitude, latitude, aurora] = firstCoordinate;
-            console.log("mineL", myLocation)
-            if(latitude == myLocation) {
-            console.log("lat", latitude); 
-            } else {
-
-            }
-        }
-    }
-    useEffect(() => {
-        fetchData();
-        checkCoordinate();
-
-        const interval = setInterval(() => {
-            fetchData();
-            checkCoordinate();
-        }, 100000);
-
-        return () => clearInterval(interval);
-    }, []);
-
-    const calculateDistance = (aLat, aLon, uLat, uLon) => {
-        const radius = 6371;
-        const dLat = (uLat - aLat) * (Math.PI / 180);
-        const dLon = (uLon - aLon) * (Math.PI / 180);
-
-        const a =
-            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(aLat * (Math.PI / 180)) *
-            Math.cos(uLat * (Math.PI / 180)) *
-            Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        const distance = radius * c;
-        return distance;
-    }
-
-    // const filterAuroraData = () => {
-    //       return repositories.flatMap(item =>
-    //        item.coordinates.map(coord => {
-    //             const auroraLat = coord[1];
-    //              const auroraLon = coord[0];
-    //             const userLat = location.coords.latitude;
-    //            const userLon = location.coords.longitude;
-    //       const distance = calculateDistance(userLat, userLon, auroraLat, auroraLon);
-    //     return distance < 500;
-    //        })
-    //       );
-
-
-
+    const { fixedCoords, cloudiness, bzLevel, auroraScore, alertLevel } = FetchItems(myLat, myLon);
+ 
+    const currentTime = new Date().toLocaleString();
+    const myLocation = useContext(LocationContext);
 
 
     return (
+
         <View style={styles.container}>
+            <Title style={styles.title}>
+                Welcome
+            </Title>  
+            <View>
+                <Title>
+                    Current conditions
+                </Title>
+                <Text>The chances of aurora lights right now are {alertLevel}</Text>
+                <Text>Your coordinates: {fixedCoords[0] + ", " + fixedCoords[1] || 'Loading...'}  </Text>
+                <Text>
+                    Aurora Intensity: {fixedCoords[2] !== undefined ? `${fixedCoords[2]}%` : 'Loading...'}
+                </Text>
 
-            <FlatList
-                style={{ width: '90%', marginTop: 10 }}
-                data={repositories.coordinates}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item }) =>
-                    <Card style={{ margin: 10 }}>
-                        <Card.Title title={`Longitude: ${item[0]} , Latitude: ${item[1]}`} />
-                        <Card.Content>
-                            <Text variant="bodyMedium">
-                                Aurora Intensity: {item[2]}
-                            </Text>
-                            <Text>
-
-                            </Text>
-
-                        </Card.Content>
-                        <Card.Actions>
-                            <IconButton icon="web"
-                                onPress={() => handleBrowser(item.html_url)} />
-                        </Card.Actions>
-                    </Card>
-                }
-            />
-
+                <Text>Cloudiness: {cloudiness !== null ? `${cloudiness}` : 'Loading...'}</Text>
+                <Text>BZ Level: {bzLevel !== null ? bzLevel : 'Loading...'}</Text>
+            </View>
+            <View style={styles.mapContainer}>
+                {fixedCoords[0] && fixedCoords[1] ? (
+                    <MapView
+                        style={{ flex: 1 }}
+                        initialRegion={{
+                            latitude: myLocation.coords.latitude,
+                            longitude: myLocation.coords.longitude,
+                        }}
+                    >
+                        <Marker
+                            coordinate={{
+                                latitude: myLocation.coords.latitude,
+                                longitude: myLocation.coords.longitude,
+                            }}
+                            title="Your location"
+                            pinColor="red"
+                        />
+                    </MapView>
+                ) : (
+                    <Text>Loading Map...</Text>
+                )}
+            </View>
         </View>
     );
 }
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        marginTop: 150,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
+        backgroundColor: '#f8f9fa',
+        padding: 20,
+    },
+    title: {
+        backgroundColor: "",
+        fontFamily: "Helvetica",
+        fontSize: 32,
+    },
+    infoContainer: {
+        marginBottom: 20,
+        backgroundColor: '#ffffff',
+        padding: 15,
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    infoText: {
+        fontSize: 16,
+        color: '#333',
+        marginBottom: 5,
+    },
+    mapContainer: {
+        width: '100%',
+        height: 350,
+        borderRadius: 10,
+        overflow: 'hidden',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    map: {
+        flex: 1,
+    },
+    loadingText: {
+        textAlign: 'center',
+        marginTop: 10,
+        fontSize: 16,
+        color: '#888',
     },
 });
-
-
-//https://services.swpc.noaa.gov/products/solar-wind/
-//Dont alert while cloudy
-//https://services.swpc.noaa.gov/products/alerts.json
-//https://www.swpc.noaa.gov/noaa-scales-explanation
-//https://opendata.fmi.fi/timeseries?format=json&timeformat=sql&producer=opendata&timestep=10m&starttime=-2h&endtime=0h&param=stationname,utctime,nanmean(nanmean_t(Cloudiness/1h))%20as%20Cloudiness&latlon=61.23,25.25:50
-//https://opendata.fmi.fi/timeseries?format=json&timeformat=sql&producer=opendata&timestep=10m&starttime=-2h&endtime=0h&param=stationname,utctime,nanmean(nanmean_t(Cloudiness/1h))%20as%20Cloudiness&place=Helsinki:50
-//https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json
-//https://github.com/fmidev/smartmet-plugin-timeseries/blob/master/docs/Using-the-Timeseries-API.md
-//bz_gsm -5 verylight, -10 light, -15 
-// time 1 hour -5 !, 1 hour -10
-//average bz and check time and level (1 hour)
