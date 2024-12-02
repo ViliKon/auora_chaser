@@ -15,6 +15,7 @@ export default function CurrentState() {
 
     const { fixedCoords, cloudiness, bzLevel, auroraScore, alertLevel } = FetchItems(myLat, myLon);
 
+    //Info/CurrentState Page
     return (
         <View style={styles.container}>
             <LinearGradient

@@ -17,7 +17,7 @@ export default function Home() {
 
 
 
-
+    //Home Page
     return (
         <View style={styles.container}>
             <LinearGradient
