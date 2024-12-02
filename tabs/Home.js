@@ -4,59 +4,55 @@ import { LocationContext } from './UserLocation';
 import { FetchItems } from './FetchItems';
 import MapView, { Marker } from 'react-native-maps';
 import { Title } from 'react-native-paper';
- 
+import { LinearGradient } from 'expo-linear-gradient';
+
+
 export default function Home() {
     const location = useContext(LocationContext);
     const myLat = location ? Math.round(location.coords.latitude) : null;
     const myLon = location ? Math.round(location.coords.longitude) : null;
 
     const { fixedCoords, cloudiness, bzLevel, auroraScore, alertLevel } = FetchItems(myLat, myLon);
- 
-    const currentTime = new Date().toLocaleString();
     const myLocation = useContext(LocationContext);
 
 
+
+
     return (
-
         <View style={styles.container}>
-            <Title style={styles.title}>
-                Welcome
-            </Title>  
-            <View>
-                <Title>
-                    Current conditions
+            <LinearGradient
+                colors={['#00ea8d', '#1e3c72', '#017ed5', '#b53dff']} 
+                style={styles.background}
+            >
+                <Title style={styles.title}>
+                    Welcome
                 </Title>
-                <Text>The chances of aurora lights right now are {alertLevel}</Text>
-                <Text>Your coordinates: {fixedCoords[0] + ", " + fixedCoords[1] || 'Loading...'}  </Text>
-                <Text>
-                    Aurora Intensity: {fixedCoords[2] !== undefined ? `${fixedCoords[2]}%` : 'Loading...'}
-                </Text>
-
-                <Text>Cloudiness: {cloudiness !== null ? `${cloudiness}` : 'Loading...'}</Text>
-                <Text>BZ Level: {bzLevel !== null ? bzLevel : 'Loading...'}</Text>
-            </View>
-            <View style={styles.mapContainer}>
-                {fixedCoords[0] && fixedCoords[1] ? (
-                    <MapView
-                        style={{ flex: 1 }}
-                        initialRegion={{
-                            latitude: myLocation.coords.latitude,
-                            longitude: myLocation.coords.longitude,
-                        }}
-                    >
-                        <Marker
-                            coordinate={{
+                <View style={styles.visibility}>
+                    <Text style={styles.infoText}>The chances of aurora lights right now are {alertLevel}</Text>
+                </View>
+                <View style={styles.mapContainer}>
+                    {fixedCoords[0] && fixedCoords[1] ? (
+                        <MapView
+                            style={{ flex: 1 }}
+                            initialRegion={{
                                 latitude: myLocation.coords.latitude,
                                 longitude: myLocation.coords.longitude,
                             }}
-                            title="Your location"
-                            pinColor="red"
-                        />
-                    </MapView>
-                ) : (
-                    <Text>Loading Map...</Text>
-                )}
-            </View>
+                        >
+                            <Marker
+                                coordinate={{
+                                    latitude: myLocation.coords.latitude,
+                                    longitude: myLocation.coords.longitude,
+                                }}
+                                title="Your location"
+                                pinColor="red"
+                            />
+                        </MapView>
+                    ) : (
+                        <Text>Loading Map...</Text>
+                    )}
+                </View>
+            </LinearGradient>
         </View>
     );
 }
@@ -64,13 +60,20 @@ export default function Home() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8f9fa',
-        padding: 20,
+    },
+    background: {
+        width: '100%',
+        height: '100%',
+        paddingHorizontal: 10,
+        paddingVertical: 10,
     },
     title: {
         backgroundColor: "",
         fontFamily: "Helvetica",
         fontSize: 32,
+    },
+    visibility: {
+        marginTop: 20,
     },
     infoContainer: {
         marginBottom: 20,
@@ -98,6 +101,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
+        marginTop: 30,
     },
     map: {
         flex: 1,

@@ -2,6 +2,7 @@ import { useState, useEffect, createContext } from 'react';
 import * as Location from 'expo-location';
 import { Alert } from 'react-native';
 
+
 export const LocationContext = createContext();
 
 export default function UserLocation({children}) {

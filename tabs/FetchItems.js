@@ -1,26 +1,32 @@
 import { useState, useEffect } from 'react';
 
+//Alert users when there is a chance to see aurora lights
 const useAlerts = (cloudiness, bzLevel, auroraIntensity, bzDuration) => {
     let score = 0;
     let alertLevel = "unlikely";
 
-    // Calculate aurora score
+    // Score system which takes many factors to consideration to determine aurora visibility
+
+    //Check if its cloudy
     if (cloudiness <= 3) score += 30;
     else if (cloudiness <= 5) score += 15;
 
+    //Check bz level
     if (bzLevel <= -40) score += 40;
     else if (bzLevel <= -30) score += 30;
     else if (bzLevel <= -20) score += 20;
     else if (bzLevel <= -10) score += 10;
 
+    //Check aurora intensity
     if (auroraIntensity >= 75) score += 30;
     else if (auroraIntensity >= 50) score += 20;
     else if (auroraIntensity >= 30) score += 10;
 
+    //Check how long the bz level has been "low" for. The longer it has been, the higher chance of seeing aurora lights
     if (bzDuration >= 60) score += 20;
     else if (bzDuration >= 30) score += 10;
 
-   
+   //Higher score means better chance of seeing aurora lights
     if (score >= 80) alertLevel = "high";
     else if (score >= 50) alertLevel = "moderate";
     else if (score >= 30) alertLevel = "low";
@@ -35,6 +41,9 @@ export const FetchItems = (myLat, myLon) => {
     const [bzStartTime, setBzStartTime] = useState(null);
     const [bzDuration, setBzDuration] = useState(0);
 
+    
+    //Fetches
+    //Longitude and Latitude and the aurora intensity at those coordinates
     const fetchAurora = async () => {
         try {
             const response = await fetch(`https://services.swpc.noaa.gov/json/ovation_aurora_latest.json`);
@@ -45,6 +54,8 @@ export const FetchItems = (myLat, myLon) => {
         } 
     };
 
+    //Search through the coordinates and find the one that macthes the users coordinates
+    //Tolerance is necessary to avoid errors where for example user longitude matches with fetched longitude but the latitude doesn't causing conflict in the aurora intensity fetched
     const checkCoordinate = () => {
         if (!auroraRepositories.coordinates || !myLat || !myLon) return;
 
@@ -62,11 +73,13 @@ export const FetchItems = (myLat, myLon) => {
 
         if (myInfo) {
             setFixedCoords(myInfo);
-        } else {
-            setFixedCoords([]);
+        } else { 
+            setFixedCoords([]);  
         }
     };
 
+    
+    //Fetch latest cloud data
     const fetchClouds = async () => {
         try {
             const response = await fetch(
@@ -74,11 +87,13 @@ export const FetchItems = (myLat, myLon) => {
             );
             const data = await response.json();
             setCloudiness(data[data.length - 1]?.Cloudiness || null);
-        } catch (error) {
+        } catch (error) { 
             console.error('Error fetching cloudiness data:', error);
         }
     };
 
+    
+    //Fecth latest bz level data
     const fetchbz = async () => {
         try {
             const response = await fetch(`https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json`);
@@ -94,6 +109,7 @@ export const FetchItems = (myLat, myLon) => {
         fetchClouds();
         fetchbz();
 
+        //Time interval for bz level
         const interval = setInterval(() => {
             fetchAurora();
             fetchClouds();
@@ -107,6 +123,7 @@ export const FetchItems = (myLat, myLon) => {
         checkCoordinate();
     }, [auroraRepositories]);
 
+    //Once bz level reaches -10 or below, the interval starts
     useEffect(() => {
         if (bzLevel <= -10) {
             if (!bzStartTime) setBzStartTime(new Date());
@@ -120,7 +137,7 @@ export const FetchItems = (myLat, myLon) => {
         }
     }, [bzLevel, bzStartTime]);
 
-
+    //Starting units
     const { auroraScore, alertLevel } = cloudiness !== null && bzLevel !== null && fixedCoords[2] !== undefined
         ? useAlerts(cloudiness, bzLevel, fixedCoords[2], bzDuration)
         : { auroraScore: 0, alertLevel: 'Unlikely' };
