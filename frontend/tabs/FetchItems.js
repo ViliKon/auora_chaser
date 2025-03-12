@@ -98,6 +98,14 @@ export const FetchItems = (myLat, myLon) => {
             const cloudRespnose = await fetch("http://127.0.0.1:8000/cloudData");
             const bzResponse = await fetch("http://127.0.0.1:8000/bzData");
             const intensityResponse = await fetch("http://127.0.0.1:8000/intensityData");
+
+            const cloudData = await cloudRespnose.json();
+            const bzData = await bzResponse.json();
+            const intensityData = await intensityResponse.json();
+
+            setCloudiness(cloudData[cloudData.length - 1]?.Cloudiness || null);
+            setBzLevel(bzData[bzData.length - 1]?.Bz || null);
+            setAuroraRepositories(intensityData);  
         } catch (error) {
             console.error('Error fetching data:', error);
         }

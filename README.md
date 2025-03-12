@@ -9,3 +9,6 @@ As of now the app looks very simple from the users perspecitve, but there is alo
 Navigation container is used so that users can switch from home page to the info page.
 
 The app now can succesfully alert users when there is a possibility of seeing aurora lights and show the data that leads to those conclusions. n the future, I have hopes of making the UI better and flesing the app out more. 
+
+2025
+Currently working on the backend. Aiming to develope automated alerts and integrating AI to forecast aurora sightings.
