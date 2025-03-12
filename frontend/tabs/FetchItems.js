@@ -93,7 +93,15 @@ export const FetchItems = (myLat, myLon) => {
         }
     };
 
-    
+    fetchData = async () => {
+        try {
+            const cloudRespnose = await fetch("http://127.0.0.1:8000/cloudData");
+            const bzResponse = await fetch("http://127.0.0.1:8000/bzData");
+            const intensityResponse = await fetch("http://127.0.0.1:8000/intensityData");
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    }
     //Fecth latest bz level data
     const fetchbz = async () => {
         try {
@@ -145,3 +153,5 @@ export const FetchItems = (myLat, myLon) => {
 
     return { fixedCoords, cloudiness, bzLevel, auroraScore, alertLevel };
 };
+
+

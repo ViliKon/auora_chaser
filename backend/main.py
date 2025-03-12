@@ -1,9 +1,19 @@
 from fastapi import FastAPI
-from intensityFetch import fetch_intesnity
-from cloudFetch import fecth_cloud_data 
-from bzFetch import fecth_bz
+from fastapi.middleware.cors import CORSMiddleware
+from services.intensityFetch import fetch_intesnity
+from services.cloudFetch import fecth_cloud_data 
+from services.bzFetch import fecth_bz
 
 app = FastAPI()
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], 
+    allow_credentials=True,
+    allow_methods=["*"],  
+    allow_headers=["*"],  
+)
 
 @app.get("/intensityData")
 def getdata():
